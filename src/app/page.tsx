@@ -510,28 +510,153 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Subsequent Content Section */}
+      {/* Purpose / About Section (Directly after Hero) */}
       <section
         ref={contentSectionRef}
         style={{
           position: "relative",
           zIndex: 35,
-          minHeight: "70vh",
-          padding: "7rem 2rem 5rem 2rem",
+          minHeight: "75vh",
+          padding: "7rem 4rem 5rem 4rem",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-start",
           backgroundColor: "#FAF7F5",
         }}
+        className="px-6 sm:px-12 md:px-16"
       >
-        <div style={{ flex: 1 }} />
+        <div
+          style={{
+            width: "100%",
+            padding: "2rem 0 4rem 0",
+            display: "grid",
+            gridTemplateColumns: "180px 1fr",
+            gap: "2rem 4rem",
+            alignItems: "start",
+          }}
+          className="grid grid-cols-1 md:grid-cols-[160px_1fr] lg:grid-cols-[200px_1fr]"
+        >
+          {/* Left Column: Label like (About Us) in Snapshot 1 */}
+          <div style={{ paddingTop: "0.6rem" }}>
+            <span
+              style={{
+                fontSize: "0.92rem",
+                fontWeight: 500,
+                color: "#550818",
+                opacity: 0.85,
+                letterSpacing: "0.01em",
+              }}
+            >
+              (Our Purpose)
+            </span>
+          </div>
+
+          {/* Right Column: Statement in Snapshot 1's Font Style, Weight & Size */}
+          <div style={{ maxWidth: "1050px" }}>
+            <h2
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(2rem, 3.8vw, 3.75rem)",
+                fontWeight: 600,
+                lineHeight: 1.22,
+                letterSpacing: "-0.03em",
+                color: "#550818",
+                margin: 0,
+                textAlign: "left",
+              }}
+            >
+              To make everyday indulgence and gifting more meaningful.
+            </h2>
+          </div>
+        </div>
+
+        {/* Vision and Mission: Vision full left-aligned, Mission right side */}
+        <div
+          style={{
+            width: "100%",
+            marginTop: "3.5rem",
+            marginBottom: "3rem",
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "3.5rem 4rem",
+          }}
+          className="grid-cols-1 md:grid-cols-2"
+        >
+          {/* Vision Block (Pulled all the way left) */}
+          <div style={{ display: "flex", flexDirection: "column", textAlign: "left", maxWidth: "620px" }}>
+            <h3
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(2rem, 3.8vw, 3.75rem)",
+                fontWeight: 600,
+                lineHeight: 1.2,
+                color: "#550818",
+                margin: "0 0 1.2rem 0",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Vision
+            </h3>
+            <p
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.2rem, 1.9vw, 1.75rem)",
+                fontWeight: 500,
+                lineHeight: 1.38,
+                color: "rgba(85, 8, 24, 0.88)",
+                margin: 0,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              To become the destination people think of first for dates, nuts and chocolates that are as good to give as they are to enjoy.
+            </p>
+          </div>
+
+          {/* Mission Block (Right side, staggered lower matching arrow direction) */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "left",
+              maxWidth: "620px",
+              marginLeft: "auto",
+              marginTop: "clamp(1.5rem, 4vw, 4rem)",
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(2rem, 3.8vw, 3.75rem)",
+                fontWeight: 600,
+                lineHeight: 1.2,
+                color: "#550818",
+                margin: "0 0 1.2rem 0",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Mission
+            </h3>
+            <p
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.2rem, 1.9vw, 1.75rem)",
+                fontWeight: 500,
+                lineHeight: 1.38,
+                color: "rgba(85, 8, 24, 0.88)",
+                margin: 0,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              To select quality products, present them with care, and make gifting simple for every occasion, from a family visit to a client thank-you.
+            </p>
+          </div>
+        </div>
 
         {/* Bottom footer bar */}
         <div
           style={{
             width: "100%",
-            maxWidth: "1140px",
             marginTop: "6rem",
             paddingTop: "2rem",
             borderTop: "1px solid rgba(85, 8, 24, 0.12)",
