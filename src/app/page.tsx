@@ -10,6 +10,7 @@ import Lenis from "lenis";
 export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const mainWrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const heroImageRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
@@ -18,6 +19,28 @@ export default function Home() {
   const scrollDownPromptRef = useRef<HTMLDivElement>(null);
   const brandWatermarkRef = useRef<HTMLDivElement>(null);
   const contentSectionRef = useRef<HTMLElement>(null);
+
+  // About Section References for Scroll-Driven Transition
+  const aboutTransitionTrackRef = useRef<HTMLDivElement>(null);
+  const aboutCurtainRef = useRef<HTMLDivElement>(null);
+  const aboutHeroWrapperRef = useRef<HTMLDivElement>(null);
+  const aboutHeroImageRef = useRef<HTMLDivElement>(null);
+  const aboutHeroOverlayTextRef = useRef<HTMLDivElement>(null);
+  const aboutSectionRef = useRef<HTMLElement>(null);
+  const aboutHeaderRef = useRef<HTMLDivElement>(null);
+  const aboutStoryRef = useRef<HTMLDivElement>(null);
+  const buyersSectionRef = useRef<HTMLDivElement>(null);
+  const card1Ref = useRef<HTMLDivElement>(null);
+  const card2Ref = useRef<HTMLDivElement>(null);
+  const card3Ref = useRef<HTMLDivElement>(null);
+
+  // Contact Section References for Scroll-Driven Transition from About
+  const contactTransitionTrackRef = useRef<HTMLDivElement>(null);
+  const contactCurtainRef = useRef<HTMLDivElement>(null);
+  const contactHeroWrapperRef = useRef<HTMLDivElement>(null);
+  const contactHeroImageRef = useRef<HTMLDivElement>(null);
+  const contactSectionRef = useRef<HTMLElement>(null);
+  const contactContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
@@ -42,7 +65,7 @@ export default function Home() {
     gsap.ticker.add(tickerCallback);
     gsap.ticker.lagSmoothing(0);
 
-    // 2. Setup GSAP ScrollTrigger timeline
+    // 2. Setup GSAP ScrollTrigger timeline across the entire page
     const ctx = gsap.context(() => {
       if (!heroImageRef.current || !containerRef.current) return;
 
@@ -148,7 +171,263 @@ export default function Home() {
           },
         });
       }
-    }, containerRef);
+
+      // 3. Exact Scroll-Driven Transition matching Reference Video:
+      // Pinned theatrical transition: The incoming About Hero starts centered / compact,
+      // rises up over the content, smoothly expands and fills the screen, reveals the
+      // title/tagline overlay, then seamlessly leads into the full About page story content.
+      if (
+        aboutTransitionTrackRef.current &&
+        aboutCurtainRef.current &&
+        aboutHeroWrapperRef.current &&
+        aboutHeroImageRef.current
+      ) {
+        gsap.set(aboutCurtainRef.current, {
+          y: "30%",
+        });
+        gsap.set(aboutHeroWrapperRef.current, {
+          width: "56vw",
+          height: "44vh",
+          borderRadius: "24px",
+          boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
+        });
+        gsap.set(aboutHeroImageRef.current, {
+          scale: 1.15,
+        });
+        if (aboutHeroOverlayTextRef.current) {
+          gsap.set(aboutHeroOverlayTextRef.current, {
+            opacity: 0,
+            y: 20,
+          });
+        }
+        if (aboutStoryRef.current) {
+          gsap.set(aboutStoryRef.current, {
+            opacity: 0,
+            y: 30,
+          });
+        }
+
+        const transitionTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: aboutTransitionTrackRef.current,
+            start: "top top",
+            end: "+=130%",
+            pin: true,
+            scrub: 0.9,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Stage 1: The curtain sweeps up immediately into view
+        transitionTl.to(
+          aboutCurtainRef.current,
+          {
+            y: "0%",
+            ease: "power2.out",
+          },
+          0
+        )
+        // Stage 2: Hero expands from compact preview to full bleed screen smoothly
+        .to(
+          aboutHeroWrapperRef.current,
+          {
+            width: "100vw",
+            height: "100vh",
+            borderRadius: "0px",
+            boxShadow: "none",
+            ease: "power2.inOut",
+          },
+          0.15
+        )
+        // Image counter-scale for parallax depth
+        .to(
+          aboutHeroImageRef.current,
+          {
+            scale: 1,
+            ease: "power2.inOut",
+          },
+          0.15
+        )
+        // Snappy transition into content
+        .to({}, { duration: 0.2 });
+
+        // Once the user scrolls past the pinned transition into the About story section,
+        // fade in the editorial content
+        if (aboutSectionRef.current && aboutStoryRef.current) {
+          ScrollTrigger.create({
+            trigger: aboutSectionRef.current,
+            start: "top 75%",
+            onEnter: () => {
+              gsap.to(aboutStoryRef.current, {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power2.out",
+              });
+            },
+            onLeaveBack: () => {
+              gsap.to(aboutStoryRef.current, {
+                opacity: 0,
+                y: 40,
+                duration: 0.4,
+                ease: "power2.in",
+              });
+            },
+          });
+        }
+      }
+
+      // 4. Dedicated Full Pinned Scroll Stage for the 3 Stepped Buyer Cards
+      // The viewport pins cleanly, showing Card 1 first. Then Card 2 is pulled up,
+      // followed by Card 3. All 3 cards rest completely visible in viewport before the page releases down.
+      if (
+        buyersSectionRef.current &&
+        card1Ref.current &&
+        card2Ref.current &&
+        card3Ref.current
+      ) {
+        gsap.set(card2Ref.current, { y: "100vh", opacity: 0 });
+        gsap.set(card3Ref.current, { y: "100vh", opacity: 0 });
+
+        const buyersTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: buyersSectionRef.current,
+            start: "top top",
+            end: "+=260%",
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Step 1: Hold Card 1 briefly as pinned section begins
+        buyersTl.to({}, { duration: 0.2 });
+
+        // Step 2: Card 2 pulls up smoothly into center
+        buyersTl.to(card2Ref.current, {
+          y: 0,
+          opacity: 1,
+          ease: "power2.out",
+          duration: 1.2,
+        });
+
+        // Step 3: Card 3 pulls up smoothly into right
+        buyersTl.to(
+          card3Ref.current,
+          {
+            y: 0,
+            opacity: 1,
+            ease: "power2.out",
+            duration: 1.2,
+          },
+          "+=0.2"
+        );
+
+        // Step 4: Crucial hold: all three cards stay fully up and visible together before releasing the page downwards
+        buyersTl.to({}, { duration: 1.2 });
+      }
+
+      // 5. Scroll-Driven Transition from About to Contact
+      // Exactly identical pinned theatrical transition as Hero -> About:
+      // The incoming Contact Hero starts centered / compact, rises up over the content,
+      // smoothly expands and fills the screen, then seamlessly leads into the full Contact section.
+      if (
+        contactTransitionTrackRef.current &&
+        contactCurtainRef.current &&
+        contactHeroWrapperRef.current &&
+        contactHeroImageRef.current
+      ) {
+        gsap.set(contactCurtainRef.current, {
+          y: "30%",
+        });
+        gsap.set(contactHeroWrapperRef.current, {
+          width: "56vw",
+          height: "44vh",
+          borderRadius: "24px",
+          boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
+        });
+        gsap.set(contactHeroImageRef.current, {
+          scale: 1.15,
+        });
+        if (contactContentRef.current) {
+          gsap.set(contactContentRef.current, {
+            opacity: 0,
+            y: 30,
+          });
+        }
+
+        const contactTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: contactTransitionTrackRef.current,
+            start: "top top",
+            end: "+=130%",
+            pin: true,
+            scrub: 0.9,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        // Stage 1: The curtain sweeps up immediately into view
+        contactTl
+          .to(
+            contactCurtainRef.current,
+            {
+              y: "0%",
+              ease: "power2.out",
+            },
+            0
+          )
+          // Stage 2: Hero expands from compact preview to full bleed screen smoothly
+          .to(
+            contactHeroWrapperRef.current,
+            {
+              width: "100vw",
+              height: "100vh",
+              borderRadius: "0px",
+              boxShadow: "none",
+              ease: "power2.inOut",
+            },
+            0.15
+          )
+          // Parallax counter-scale
+          .to(
+            contactHeroImageRef.current,
+            {
+              scale: 1,
+              ease: "power2.inOut",
+            },
+            0.15
+          )
+          .to({}, { duration: 0.2 });
+
+        // Once scrolled past the pinned transition, reveal the Contact section content
+        if (contactSectionRef.current && contactContentRef.current) {
+          ScrollTrigger.create({
+            trigger: contactSectionRef.current,
+            start: "top 75%",
+            onEnter: () => {
+              gsap.to(contactContentRef.current, {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power2.out",
+              });
+            },
+            onLeaveBack: () => {
+              gsap.to(contactContentRef.current, {
+                opacity: 0,
+                y: 40,
+                duration: 0.4,
+                ease: "power2.in",
+              });
+            },
+          });
+        }
+      }
+    }, mainWrapperRef);
 
     return () => {
       ctx.revert();
@@ -159,6 +438,7 @@ export default function Home() {
 
   return (
     <div
+      ref={mainWrapperRef}
       style={{
         backgroundColor: "#FAF7F5",
         color: "#550818",
@@ -187,11 +467,7 @@ export default function Home() {
         className="px-6 sm:px-12 md:px-16"
       >
         <Link
-          href="#story"
-          onClick={(e) => {
-            e.preventDefault();
-            setDrawerOpen(true);
-          }}
+          href="/about"
           style={{
             fontSize: "0.93rem",
             fontWeight: 500,
@@ -234,11 +510,7 @@ export default function Home() {
         </Link>
 
         <Link
-          href="#contact"
-          onClick={(e) => {
-            e.preventDefault();
-            setDrawerOpen(true);
-          }}
+          href="/contact"
           style={{
             fontSize: "0.93rem",
             fontWeight: 500,
@@ -653,63 +925,981 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Bottom footer bar */}
+        {/* Featured Showcase: Gift Box & Brand Story Side-by-Side */}
         <div
           style={{
             width: "100%",
-            marginTop: "6rem",
-            paddingTop: "2rem",
-            borderTop: "1px solid rgba(85, 8, 24, 0.12)",
+            marginTop: "3.5rem",
+            marginBottom: "3.5rem",
             display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: "3rem 4.5rem",
             alignItems: "center",
-            justifyContent: "space-between",
           }}
         >
-          <div style={{ fontSize: "0.85rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#550818" }}>
-            MABZUL&reg; 2026
+          {/* Left: Image (Parallel) */}
+          <div
+            style={{
+              flex: "0 0 auto",
+              width: "100%",
+              maxWidth: "520px",
+              borderRadius: "18px",
+              overflow: "hidden",
+              boxShadow: "0 22px 55px -10px rgba(85, 8, 24, 0.16)",
+              position: "relative",
+              aspectRatio: "490 / 648",
+            }}
+          >
+            <Image
+              src="/mabzul-gift-box.jpg"
+              alt="Mabzul Luxury Gift Box - Dates, Nuts, Chocolates"
+              fill
+              sizes="(max-width: 768px) 100vw, 520px"
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+              }}
+            />
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <button
-              onClick={() => setDrawerOpen(true)}
+
+          {/* Right: Brand Detail Text (Beside / Parallel to the Image) */}
+          <div
+            style={{
+              flex: "1 1 340px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "2.2rem",
+              maxWidth: "680px",
+            }}
+          >
+            <p
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.85rem",
-                padding: "0.65rem 1.4rem",
-                border: "1px solid rgba(85, 8, 24, 0.45)",
-                backgroundColor: "transparent",
-                color: "#550818",
-                fontSize: "0.78rem",
-                fontWeight: 700,
-                letterSpacing: "0.14em",
-                cursor: "pointer",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.1rem, 1.4vw, 1.35rem)",
+                fontWeight: 500,
+                lineHeight: 1.6,
+                color: "rgba(85, 8, 24, 0.88)",
+                margin: 0,
+                letterSpacing: "-0.015em",
               }}
             >
-              <span>SHOP NOW</span>
-              <span style={{ fontFamily: "serif", fontSize: "0.95rem", letterSpacing: "2px" }}>::</span>
-            </button>
-            <button
-              onClick={() => setDrawerOpen(true)}
+              MABZUL is built around the culture of goodness and sharing. Its identity takes inspiration from the date palm, connecting the brand to the heritage of dates and dry fruits, while its balanced visual form reflects curated gifts and hampers.
+            </p>
+
+            <p
               style={{
-                width: "42px",
-                height: "42px",
-                backgroundColor: "#550818",
-                border: "none",
-                display: "inline-flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "4px",
-                cursor: "pointer",
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.1rem, 1.4vw, 1.35rem)",
+                fontWeight: 500,
+                lineHeight: 1.6,
+                color: "rgba(85, 8, 24, 0.88)",
+                margin: 0,
+                letterSpacing: "-0.015em",
               }}
-              aria-label="Toggle navigation menu"
             >
-              <span style={{ display: "block", width: "15px", height: "2px", backgroundColor: "#FAF7F5", borderRadius: "1px" }} />
-              <span style={{ display: "block", width: "9px", height: "2px", backgroundColor: "#FAF7F5", borderRadius: "1px", alignSelf: "flex-start", marginLeft: "13.5px" }} />
-            </button>
+              Bringing together dates, nuts and chocolates, MABZUL turns familiar favourites into a refined experience for everyday enjoyment, hosting and meaningful gifting. The brand feels contemporary and welcoming, with a clear connection to regional food culture.
+            </p>
+
+            <p
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.1rem, 1.4vw, 1.35rem)",
+                fontWeight: 500,
+                lineHeight: 1.6,
+                color: "rgba(85, 8, 24, 0.88)",
+                margin: 0,
+                letterSpacing: "-0.015em",
+              }}
+            >
+              MABZUL aims to be the brand people think of when they want quality treats, or a gift that feels generous and considered.
+            </p>
           </div>
         </div>
       </section>
+
+      {/* Pinned Scroll Transition Stage (Reference Video Style: Pinned Hero Expansion from Center into Full Bleed) */}
+      <section
+        ref={aboutTransitionTrackRef}
+        style={{
+          position: "relative",
+          height: "100vh",
+          width: "100%",
+          overflow: "hidden",
+          backgroundColor: "#FAF7F5",
+          zIndex: 42,
+        }}
+      >
+        <div
+          ref={aboutCurtainRef}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            willChange: "transform",
+          }}
+        >
+          {/* Centered expanding hero frame */}
+          <div
+            ref={aboutHeroWrapperRef}
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              willChange: "width, height, border-radius",
+            }}
+          >
+            {/* Hero Image */}
+            <div
+              ref={aboutHeroImageRef}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                willChange: "transform",
+              }}
+            >
+              <Image
+                src="/about-hero.jpg"
+                alt="Mabzul Fine Artisanal Chocolate, Almonds, Pistachios, and Cashews"
+                fill
+                sizes="100vw"
+                priority
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "center",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Full Editorial About Story Section */}
+      <section
+        id="about"
+        ref={aboutSectionRef}
+        style={{
+          position: "relative",
+          zIndex: 45,
+          backgroundColor: "#FAF7F5",
+          padding: "5rem 4rem 5rem 4rem",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          minHeight: "70vh",
+        }}
+        className="px-6 sm:px-12 md:px-16"
+      >
+        {/* Story Section in Editorial Headline Font & Style */}
+        <div
+          ref={aboutStoryRef}
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            gap: "3rem",
+            willChange: "opacity, transform",
+          }}
+        >
+          {/* Paragraph 1: Left aligned */}
+          <div style={{ maxWidth: "780px", width: "100%" }}>
+            <p
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.35rem, 2.2vw, 2.05rem)",
+                fontWeight: 600,
+                lineHeight: 1.38,
+                letterSpacing: "-0.025em",
+                color: "#550818",
+                margin: 0,
+                textAlign: "left",
+              }}
+            >
+              MABZUL is built around the culture of goodness and sharing. Its identity takes inspiration from the date palm, connecting the brand to the heritage of dates and dry fruits, while its balanced visual form reflects curated gifts and hampers.
+            </p>
+          </div>
+
+          {/* Paragraph 2: Positioned to the Right Half side of container */}
+          <div
+            style={{
+              maxWidth: "780px",
+              width: "100%",
+              marginLeft: "auto",
+              textAlign: "left",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.35rem, 2.2vw, 2.05rem)",
+                fontWeight: 600,
+                lineHeight: 1.38,
+                letterSpacing: "-0.025em",
+                color: "#550818",
+                margin: 0,
+              }}
+            >
+              Our generosity gives sharing its purpose. Our quality earns trust. Our attention to detail makes every gesture special. Our heritage gives every experience a deeper meaning.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Three Everyday Buyers Section (Dedicated Full Viewport Pinned Scroll Stage) */}
+      <section
+        ref={buyersSectionRef}
+        style={{
+          position: "relative",
+          zIndex: 48,
+          backgroundColor: "#FAF7F5",
+          height: "100vh",
+          width: "100%",
+          padding: "5rem 4rem 3rem 4rem",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          overflow: "hidden",
+          boxSizing: "border-box",
+        }}
+        className="px-6 sm:px-12 md:px-16"
+      >
+        <div style={{ width: "100%", maxWidth: "1350px", margin: "0 auto" }}>
+          <p
+            style={{
+              fontFamily: "var(--font-plus-jakarta), sans-serif",
+              fontSize: "clamp(1.05rem, 1.5vw, 1.45rem)",
+              fontWeight: 500,
+              color: "rgba(85, 8, 24, 0.88)",
+              letterSpacing: "-0.015em",
+              marginBottom: "2.5rem",
+              textAlign: "left",
+            }}
+          >
+            Three everyday buyers who shape how MABZUL looks, sounds and serves.
+          </p>
+
+          <div
+            style={{
+              width: "100%",
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: "2rem",
+              alignItems: "start",
+            }}
+            className="grid-cols-1 md:grid-cols-3"
+          >
+            {/* Step 1: THE THOUGHTFUL HOST (Static left card) */}
+            <div
+              ref={card1Ref}
+              style={{
+                display: "flex",
+                justifyContent: "flex-start",
+                width: "100%",
+              }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "380px",
+                  backgroundColor: "rgba(85, 8, 24, 0.03)",
+                  border: "1px solid rgba(85, 8, 24, 0.18)",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "0 14px 34px -8px rgba(85, 8, 24, 0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    height: "14px",
+                    backgroundColor: "#550818",
+                    width: "100%",
+                  }}
+                />
+                <div
+                  style={{
+                    padding: "2.2rem 1.8rem 2.4rem 1.8rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1.8rem",
+                    flex: 1,
+                  }}
+                >
+                  <div>
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "clamp(1.3rem, 1.6vw, 1.55rem)",
+                        fontWeight: 800,
+                        lineHeight: 1.22,
+                        letterSpacing: "0.02em",
+                        color: "#550818",
+                        margin: "0 0 0.85rem 0",
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      {"THE\nTHOUGHTFUL\nHOST"}
+                    </h3>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.98rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Welcomes family and guests often and wants something generous to put on the table.
+                    </p>
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "#550818",
+                        display: "block",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
+                      WANTS
+                    </span>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.95rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Quality they are proud to serve, presented with care.
+                    </p>
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "#550818",
+                        display: "block",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
+                      WORRIES ABOUT
+                    </span>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.95rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Gifts and treats that feel generic.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2: THE CORPORATE GIFTER (Pulled up on scroll) */}
+            <div
+              ref={card2Ref}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+                willChange: "transform, opacity",
+              }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "380px",
+                  backgroundColor: "rgba(85, 8, 24, 0.03)",
+                  border: "1px solid rgba(85, 8, 24, 0.18)",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "0 14px 34px -8px rgba(85, 8, 24, 0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    height: "14px",
+                    backgroundColor: "#550818",
+                    width: "100%",
+                  }}
+                />
+                <div
+                  style={{
+                    padding: "2.2rem 1.8rem 2.4rem 1.8rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1.8rem",
+                    flex: 1,
+                  }}
+                >
+                  <div>
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "clamp(1.3rem, 1.6vw, 1.55rem)",
+                        fontWeight: 800,
+                        lineHeight: 1.22,
+                        letterSpacing: "0.02em",
+                        color: "#550818",
+                        margin: "0 0 0.85rem 0",
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      {"THE\nCORPORATE\nGIFTER"}
+                    </h3>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.98rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Buys for clients, teams and events, and needs gifts that look professional.
+                    </p>
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "#550818",
+                        display: "block",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
+                      WANTS
+                    </span>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.95rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Presentable, easy to order, consistent every time.
+                    </p>
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "#550818",
+                        display: "block",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
+                      WORRIES ABOUT
+                    </span>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.95rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Options that feel too formal, or service that lets them down.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: THE EVERYDAY TREATER (Pulled up on scroll) */}
+            <div
+              ref={card3Ref}
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                width: "100%",
+                willChange: "transform, opacity",
+              }}
+            >
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "380px",
+                  backgroundColor: "rgba(85, 8, 24, 0.03)",
+                  border: "1px solid rgba(85, 8, 24, 0.18)",
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "0 14px 34px -8px rgba(85, 8, 24, 0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    height: "14px",
+                    backgroundColor: "#550818",
+                    width: "100%",
+                  }}
+                />
+                <div
+                  style={{
+                    padding: "2.2rem 1.8rem 2.4rem 1.8rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1.8rem",
+                    flex: 1,
+                  }}
+                >
+                  <div>
+                    <h3
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "clamp(1.3rem, 1.6vw, 1.55rem)",
+                        fontWeight: 800,
+                        lineHeight: 1.22,
+                        letterSpacing: "0.02em",
+                        color: "#550818",
+                        margin: "0 0 0.85rem 0",
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      {"THE\nEVERYDAY\nTREATER"}
+                    </h3>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.98rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Enjoys good dates, nuts and chocolates for themselves.
+                    </p>
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "#550818",
+                        display: "block",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
+                      WANTS
+                    </span>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.95rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      A small, well-chosen treat that feels like a moment.
+                    </p>
+                  </div>
+                  <div>
+                    <span
+                      style={{
+                        fontSize: "0.82rem",
+                        fontWeight: 800,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        color: "#550818",
+                        display: "block",
+                        marginBottom: "0.4rem",
+                      }}
+                    >
+                      WORRIES ABOUT
+                    </span>
+                    <p
+                      style={{
+                        fontFamily: "var(--font-plus-jakarta), sans-serif",
+                        fontSize: "0.95rem",
+                        lineHeight: 1.5,
+                        color: "rgba(85, 8, 24, 0.85)",
+                        margin: 0,
+                      }}
+                    >
+                      Everyday shops with little care in presentation.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pinned Scroll Transition Stage: About -> Contact (Exact replica of Home -> About video animation) */}
+      <section
+        ref={contactTransitionTrackRef}
+        style={{
+          position: "relative",
+          height: "100vh",
+          width: "100%",
+          overflow: "hidden",
+          backgroundColor: "#FAF7F5",
+          zIndex: 42,
+        }}
+      >
+        <div
+          ref={contactCurtainRef}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            willChange: "transform",
+          }}
+        >
+          {/* Centered expanding hero frame */}
+          <div
+            ref={contactHeroWrapperRef}
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              willChange: "width, height, border-radius",
+            }}
+          >
+            {/* Hero Image */}
+            <div
+              ref={contactHeroImageRef}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                willChange: "transform",
+              }}
+            >
+              <Image
+                src="/contact-hero.jpg"
+                alt="Contact Us - Mabzul Confectionery & Gourmet Gifting"
+                fill
+                sizes="100vw"
+                priority
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "center",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Embedded Contact Section (Seamless transition after pinned expansion) */}
+      <section
+        id="contact"
+        ref={contactSectionRef}
+        style={{
+          position: "relative",
+          zIndex: 45,
+          backgroundColor: "#FAF7F5",
+          color: "#550818",
+          minHeight: "85vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "5rem 4rem 3rem 4rem",
+          boxSizing: "border-box",
+        }}
+        className="px-6 sm:px-12 md:px-16"
+      >
+        <div
+          ref={contactContentRef}
+          style={{
+            width: "100%",
+            maxWidth: "1300px",
+            margin: "auto auto",
+            display: "grid",
+            gridTemplateColumns: "1fr 1.3fr",
+            gap: "4rem 6rem",
+            alignItems: "center",
+            willChange: "opacity, transform",
+          }}
+          className="grid-cols-1 md:grid-cols-[1fr_1.3fr]"
+        >
+          {/* Left Column: Heading */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1.2rem",
+                marginBottom: "1rem",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "#550818",
+                }}
+              >
+                CONTACT
+              </span>
+              <span
+                style={{
+                  width: "48px",
+                  height: "1px",
+                  backgroundColor: "rgba(85, 8, 24, 0.4)",
+                  display: "inline-block",
+                }}
+              />
+            </div>
+
+            <h2
+              className="font-cormorant"
+              style={{
+                fontSize: "clamp(3.4rem, 6.5vw, 6.2rem)",
+                fontWeight: 500,
+                lineHeight: 1.05,
+                color: "#550818",
+                margin: 0,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Let’s<br />Connect.
+            </h2>
+          </div>
+
+          {/* Right Column: Blurb + Contact List */}
+          <div style={{ display: "flex", flexDirection: "column", maxWidth: "560px" }}>
+            <p
+              style={{
+                fontFamily: "var(--font-plus-jakarta), sans-serif",
+                fontSize: "clamp(1.1rem, 1.4vw, 1.35rem)",
+                fontWeight: 500,
+                lineHeight: 1.5,
+                color: "rgba(85, 8, 24, 0.9)",
+                letterSpacing: "-0.01em",
+                margin: "0 0 2.5rem 0",
+              }}
+            >
+              We’d love to hear from you. Reach out for orders, gifting requests or any enquiries.
+            </p>
+
+            {/* Contact Details List */}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {/* Email */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1.6rem",
+                  padding: "1.4rem 0",
+                  borderBottom: "1px solid rgba(85, 8, 24, 0.15)",
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#550818"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ flexShrink: 0 }}
+                >
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                <a
+                  href="mailto:hello@mabzul.com"
+                  style={{
+                    fontSize: "clamp(1.05rem, 1.3vw, 1.25rem)",
+                    fontWeight: 600,
+                    color: "#550818",
+                    textDecoration: "none",
+                    letterSpacing: "-0.01em",
+                    transition: "opacity 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                >
+                  hello@mabzul.com
+                </a>
+              </div>
+
+              {/* Phone */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1.6rem",
+                  padding: "1.4rem 0",
+                  borderBottom: "1px solid rgba(85, 8, 24, 0.15)",
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#550818"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ flexShrink: 0 }}
+                >
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                <a
+                  href="tel:+919876543210"
+                  style={{
+                    fontSize: "clamp(1.05rem, 1.3vw, 1.25rem)",
+                    fontWeight: 600,
+                    color: "#550818",
+                    textDecoration: "none",
+                    letterSpacing: "-0.01em",
+                    transition: "opacity 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                >
+                  +91 98765 43210
+                </a>
+              </div>
+
+              {/* Location */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1.6rem",
+                  padding: "1.4rem 0",
+                }}
+              >
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#550818"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ flexShrink: 0 }}
+                >
+                  <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span
+                  style={{
+                    fontSize: "clamp(1.05rem, 1.3vw, 1.25rem)",
+                    fontWeight: 600,
+                    color: "#550818",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  Kerala, India
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer Section (Below the Pinned Stage) */}
+      <footer
+        style={{
+          width: "100%",
+          padding: "2.5rem 4rem 3.5rem 4rem",
+          backgroundColor: "#FAF7F5",
+          borderTop: "1px solid rgba(85, 8, 24, 0.12)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "relative",
+          zIndex: 50,
+          boxSizing: "border-box",
+        }}
+        className="px-6 sm:px-12 md:px-16"
+      >
+        <div style={{ fontSize: "0.85rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#550818" }}>
+          MABZUL&reg; 2026
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.85rem",
+              padding: "0.65rem 1.4rem",
+              border: "1px solid rgba(85, 8, 24, 0.45)",
+              backgroundColor: "transparent",
+              color: "#550818",
+              fontSize: "0.78rem",
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              cursor: "pointer",
+            }}
+          >
+            <span>SHOP NOW</span>
+            <span style={{ fontFamily: "serif", fontSize: "0.95rem", letterSpacing: "2px" }}>::</span>
+          </button>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            style={{
+              width: "42px",
+              height: "42px",
+              backgroundColor: "#550818",
+              border: "none",
+              display: "inline-flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "4px",
+              cursor: "pointer",
+            }}
+            aria-label="Toggle navigation menu"
+          >
+            <span style={{ display: "block", width: "15px", height: "2px", backgroundColor: "#FAF7F5", borderRadius: "1px" }} />
+            <span style={{ display: "block", width: "9px", height: "2px", backgroundColor: "#FAF7F5", borderRadius: "1px", alignSelf: "flex-start", marginLeft: "13.5px" }} />
+          </button>
+        </div>
+      </footer>
 
       {/* Backdrop overlay */}
       <div
@@ -775,23 +1965,18 @@ export default function Home() {
           }}
         >
           {[
-            { label: "Our Story", href: "#story" },
-            { label: "Curated Medjool Dates", href: "#dates" },
-            { label: "Artisanal Chocolates", href: "#chocolates" },
-            { label: "Roasted & Raw Nuts", href: "#nuts" },
-            { label: "Meaningful Gifting Boxes", href: "#gifting" },
-            { label: "Corporate Orders", href: "#corporate" },
-            { label: "Contact Us", href: "#contact" },
+            { label: "Home", href: "/" },
+            { label: "About", href: "/about" },
+            { label: "Contact", href: "/contact" },
           ].map((item, idx) => (
-            <a
+            <Link
               key={idx}
               href={item.href}
-              onClick={(e) => {
-                e.preventDefault();
+              onClick={() => {
                 setDrawerOpen(false);
               }}
               style={{
-                fontSize: "1.45rem",
+                fontSize: "1.75rem",
                 fontWeight: 400,
                 color: "#550818",
                 textDecoration: "none",
@@ -808,7 +1993,7 @@ export default function Home() {
               }}
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
