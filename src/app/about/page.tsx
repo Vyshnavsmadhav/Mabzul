@@ -163,90 +163,11 @@ export default function AboutPage() {
         overflowX: "hidden",
       }}
     >
-      {/* Header / Navbar */}
-      <header
-        style={{
-          position: "sticky",
-          top: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "1.8rem 4rem",
-          zIndex: 60,
-          backgroundColor: "rgba(250, 247, 245, 0.92)",
-          backdropFilter: "blur(8px)",
-          borderBottom: "1px solid rgba(85, 8, 24, 0.08)",
-        }}
-        className="px-6 sm:px-12 md:px-16"
-      >
-        <Link
-          href="/"
-          style={{
-            fontSize: "0.93rem",
-            fontWeight: 500,
-            color: "#550818",
-            textDecoration: "none",
-            letterSpacing: "0.3px",
-            transition: "opacity 0.2s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-        >
-          Home
-        </Link>
-
-        {/* Center Brand Logo */}
-        <Link
-          href="/"
-          style={{
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#550818",
-          }}
-        >
-          <span
-            className="font-cormorant"
-            style={{
-              fontSize: "1.95rem",
-              fontWeight: 700,
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              marginRight: "-0.22em",
-            }}
-          >
-            &middot;MABZUL&reg;
-          </span>
-        </Link>
-
-        <button
-          onClick={() => setDrawerOpen(true)}
-          style={{
-            background: "none",
-            border: "none",
-            fontSize: "0.93rem",
-            fontWeight: 500,
-            color: "#550818",
-            cursor: "pointer",
-            letterSpacing: "0.3px",
-            padding: 0,
-            transition: "opacity 0.2s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.7")}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-        >
-          Menu
-        </button>
-      </header>
-
-      {/* Main About Editorial Content */}
+      {/* Main About Editorial Content - Matching Snapshot Exactly (Navbar removed) */}
       <main
         style={{
           width: "100%",
-          padding: "1.5rem 4rem 4rem 4rem",
+          padding: "5rem 4rem 4rem 4rem",
           maxWidth: "1400px",
           margin: "0 auto",
           boxSizing: "border-box",
@@ -255,61 +176,6 @@ export default function AboutPage() {
         }}
         className="px-6 sm:px-12 md:px-16"
       >
-        {/* Title Header */}
-        <div style={{ marginBottom: "1.5rem" }}>
-          <span
-            style={{
-              fontSize: "0.85rem",
-              fontWeight: 500,
-              color: "#550818",
-              opacity: 0.85,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-            }}
-          >
-            (Our Heritage &amp; Craft)
-          </span>
-          <h1
-            style={{
-              fontFamily: "var(--font-plus-jakarta), sans-serif",
-              fontSize: "clamp(2rem, 4vw, 3.8rem)",
-              fontWeight: 600,
-              lineHeight: 1.15,
-              letterSpacing: "-0.03em",
-              color: "#550818",
-              marginTop: "0.4rem",
-              marginBottom: 0,
-            }}
-          >
-            About Mabzul
-          </h1>
-        </div>
-
-        {/* Hero Image Section */}
-        <div
-          style={{
-            width: "100%",
-            borderRadius: "20px",
-            overflow: "hidden",
-            boxShadow: "0 24px 60px -12px rgba(85, 8, 24, 0.18)",
-            position: "relative",
-            aspectRatio: "1024 / 509",
-            marginBottom: "4.5rem",
-          }}
-        >
-          <Image
-            src="/about-hero.jpg"
-            alt="Mabzul Fine Artisanal Chocolate, Almonds, Pistachios, and Cashews"
-            fill
-            sizes="100vw"
-            priority
-            style={{
-              objectFit: "cover",
-              objectPosition: "center",
-            }}
-          />
-        </div>
-
         {/* Story Section in Editorial Headline Font & Style */}
         <div
           style={{
@@ -843,68 +709,6 @@ export default function AboutPage() {
             }}
           >
             MABZUL&reg; 2026
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <button
-              onClick={() => setDrawerOpen(true)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.85rem",
-                padding: "0.65rem 1.4rem",
-                border: "1px solid rgba(85, 8, 24, 0.45)",
-                backgroundColor: "transparent",
-                color: "#550818",
-                fontSize: "0.78rem",
-                fontWeight: 700,
-                letterSpacing: "0.14em",
-                cursor: "pointer",
-              }}
-            >
-              <span>SHOP NOW</span>
-              <span style={{ fontFamily: "serif", fontSize: "0.95rem", letterSpacing: "2px" }}>
-                ::
-              </span>
-            </button>
-
-            <button
-              onClick={() => setDrawerOpen(true)}
-              style={{
-                width: "42px",
-                height: "42px",
-                backgroundColor: "#550818",
-                border: "none",
-                display: "inline-flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "4px",
-                cursor: "pointer",
-              }}
-              aria-label="Toggle navigation menu"
-            >
-              <span
-                style={{
-                  display: "block",
-                  width: "15px",
-                  height: "2px",
-                  backgroundColor: "#FAF7F5",
-                  borderRadius: "1px",
-                }}
-              />
-              <span
-                style={{
-                  display: "block",
-                  width: "9px",
-                  height: "2px",
-                  backgroundColor: "#FAF7F5",
-                  borderRadius: "1px",
-                  alignSelf: "flex-start",
-                  marginLeft: "13.5px",
-                }}
-              />
-            </button>
           </div>
         </footer>
       </section>

@@ -346,68 +346,6 @@ export default function ContactPage() {
         >
           MABZUL&reg; 2026
         </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-          <button
-            onClick={() => setDrawerOpen(true)}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.85rem",
-              padding: "0.65rem 1.4rem",
-              border: "1px solid rgba(85, 8, 24, 0.45)",
-              backgroundColor: "transparent",
-              color: "#550818",
-              fontSize: "0.78rem",
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              cursor: "pointer",
-            }}
-          >
-            <span>SHOP NOW</span>
-            <span style={{ fontFamily: "serif", fontSize: "0.95rem", letterSpacing: "2px" }}>
-              ::
-            </span>
-          </button>
-
-          <button
-            onClick={() => setDrawerOpen(true)}
-            style={{
-              width: "42px",
-              height: "42px",
-              backgroundColor: "#550818",
-              border: "none",
-              display: "inline-flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "4px",
-              cursor: "pointer",
-            }}
-            aria-label="Toggle navigation menu"
-          >
-            <span
-              style={{
-                display: "block",
-                width: "15px",
-                height: "2px",
-                backgroundColor: "#FAF7F5",
-                borderRadius: "1px",
-              }}
-            />
-            <span
-              style={{
-                display: "block",
-                width: "9px",
-                height: "2px",
-                backgroundColor: "#FAF7F5",
-                borderRadius: "1px",
-                alignSelf: "flex-start",
-                marginLeft: "13.5px",
-              }}
-            />
-          </button>
-        </div>
       </footer>
 
       {/* Slide-out Navigation Drawer */}
