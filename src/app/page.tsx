@@ -19,6 +19,9 @@ export default function Home() {
   const scrollDownPromptRef = useRef<HTMLDivElement>(null);
   const brandWatermarkRef = useRef<HTMLDivElement>(null);
   const contentSectionRef = useRef<HTMLElement>(null);
+  const purposeBlockRef = useRef<HTMLDivElement>(null);
+  const visionBlockRef = useRef<HTMLDivElement>(null);
+  const missionBlockRef = useRef<HTMLDivElement>(null);
 
   // About Section References for Scroll-Driven Transition
   const aboutTransitionTrackRef = useRef<HTMLDivElement>(null);
@@ -39,6 +42,7 @@ export default function Home() {
   const contactCurtainRef = useRef<HTMLDivElement>(null);
   const contactHeroWrapperRef = useRef<HTMLDivElement>(null);
   const contactHeroImageRef = useRef<HTMLDivElement>(null);
+  const contactHeroOverlayTextRef = useRef<HTMLDivElement>(null);
   const contactSectionRef = useRef<HTMLElement>(null);
   const contactContentRef = useRef<HTMLDivElement>(null);
 
@@ -47,13 +51,13 @@ export default function Home() {
 
     // 1. Lenis Smooth Scroll Engine
     const lenis = new Lenis({
-      duration: 1.25,
+      duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
-      wheelMultiplier: 0.95,
-      touchMultiplier: 1.8,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
     });
 
     lenis.on("scroll", ScrollTrigger.update);
@@ -63,7 +67,7 @@ export default function Home() {
     };
 
     gsap.ticker.add(tickerCallback);
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
 
     // 2. Setup GSAP ScrollTrigger timeline across the entire page
     const ctx = gsap.context(() => {
@@ -72,15 +76,14 @@ export default function Home() {
       gsap.set(scrollDownPromptRef.current, { opacity: 0 });
       gsap.set(brandWatermarkRef.current, { opacity: 0, y: -10 });
 
-      // Create scroll-driven pinned timeline
+      // Create scroll-driven pinned timeline with natural, standard scroll distance
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
-          end: "+=260%",
+          end: "+=100%",
           pin: true,
-          scrub: 1.1,
-          anticipatePin: 1,
+          scrub: 0.6,
           invalidateOnRefresh: true,
         },
       });
@@ -93,7 +96,7 @@ export default function Home() {
           height: "104vh",
           borderRadius: "0px",
           boxShadow: "none",
-          ease: "power2.inOut",
+          ease: "none",
         },
         0
       )
@@ -101,8 +104,8 @@ export default function Home() {
           headlineRef.current,
           {
             opacity: 0,
-            scale: 0.94,
-            ease: "power1.out",
+            scale: 0.95,
+            ease: "none",
           },
           0
         )
@@ -110,7 +113,7 @@ export default function Home() {
           initialFooterRef.current,
           {
             opacity: 0,
-            ease: "power1.out",
+            ease: "none",
           },
           0
         )
@@ -120,9 +123,9 @@ export default function Home() {
           {
             opacity: 0,
             y: -15,
-            ease: "power1.out",
+            ease: "none",
           },
-          0.15
+          0
         )
         // Fade in brand label on top-left of hero as expansion completes
         .to(
@@ -132,7 +135,7 @@ export default function Home() {
             y: 0,
             ease: "power2.out",
           },
-          0.6
+          0.5
         )
         // Reveal bottom explore invitation once expanded
         .to(
@@ -141,17 +144,27 @@ export default function Home() {
             opacity: 1,
             ease: "power1.in",
           },
-          0.65
+          0.7
         )
-        // Hero rests at full screen
-        .to({}, { duration: 0.45 });
+        // Seamless release straight into the rest of the body
+        .to({}, { duration: 0.1 });
 
       // When the user scrolls past the pinned hero stage into the content section,
-      // bring back the navbar seamlessly
+      // bring back the navbar seamlessly and animate the text elements with a staggered delay
       if (contentSectionRef.current) {
+        if (purposeBlockRef.current) {
+          gsap.set(purposeBlockRef.current, { opacity: 0, y: 35 });
+        }
+        if (visionBlockRef.current) {
+          gsap.set(visionBlockRef.current, { opacity: 0, y: 35 });
+        }
+        if (missionBlockRef.current) {
+          gsap.set(missionBlockRef.current, { opacity: 0, y: 35 });
+        }
+
         ScrollTrigger.create({
           trigger: contentSectionRef.current,
-          start: "top 80%",
+          start: "top 78%",
           onEnter: () => {
             gsap.to(navRef.current, {
               opacity: 1,
@@ -160,12 +173,42 @@ export default function Home() {
               duration: 0.4,
               ease: "power2.out",
             });
+
+            // Staggered reveal for Purpose, Vision, and Mission with a fraction of a second delay
+            const textTargets = [
+              purposeBlockRef.current,
+              visionBlockRef.current,
+              missionBlockRef.current,
+            ].filter(Boolean);
+
+            gsap.to(textTargets, {
+              opacity: 1,
+              y: 0,
+              duration: 0.85,
+              stagger: 0.22,
+              delay: 0.18, // fraction of a second late
+              ease: "power2.out",
+            });
           },
           onLeaveBack: () => {
             gsap.to(navRef.current, {
               opacity: 0,
               y: -15,
               duration: 0.3,
+              ease: "power2.in",
+            });
+
+            const textTargets = [
+              purposeBlockRef.current,
+              visionBlockRef.current,
+              missionBlockRef.current,
+            ].filter(Boolean);
+
+            gsap.to(textTargets, {
+              opacity: 0,
+              y: 35,
+              duration: 0.35,
+              stagger: 0.08,
               ease: "power2.in",
             });
           },
@@ -213,8 +256,7 @@ export default function Home() {
             start: "top top",
             end: "+=130%",
             pin: true,
-            scrub: 0.9,
-            anticipatePin: 1,
+            scrub: 0.8,
             invalidateOnRefresh: true,
           },
         });
@@ -248,9 +290,23 @@ export default function Home() {
             ease: "power2.inOut",
           },
           0.15
-        )
+        );
+
+        if (aboutHeroOverlayTextRef.current) {
+          transitionTl.to(
+            aboutHeroOverlayTextRef.current,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power2.out",
+            },
+            0.35 // starts a fraction of a second later in the transition timeline
+          );
+        }
+
         // Snappy transition into content
-        .to({}, { duration: 0.2 });
+        transitionTl.to({}, { duration: 0.2 });
 
         // Once the user scrolls past the pinned transition into the About story section,
         // fade in the editorial content
@@ -278,55 +334,64 @@ export default function Home() {
         }
       }
 
-      // 4. Dedicated Full Pinned Scroll Stage for the 3 Stepped Buyer Cards
-      // The viewport pins cleanly, showing Card 1 first. Then Card 2 is pulled up,
-      // followed by Card 3. All 3 cards rest completely visible in viewport before the page releases down.
+      // 4. Dedicated Full Pinned Scroll Stage for the 3 Stepped Buyer Cards (Desktop only)
+      // On mobile (window.innerWidth < 768), cards naturally flow and are fully visible with zero lag
       if (
         buyersSectionRef.current &&
         card1Ref.current &&
         card2Ref.current &&
         card3Ref.current
       ) {
-        gsap.set(card2Ref.current, { y: "100vh", opacity: 0 });
-        gsap.set(card3Ref.current, { y: "100vh", opacity: 0 });
+        const isMobile = window.innerWidth < 768;
 
-        const buyersTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: buyersSectionRef.current,
-            start: "top top",
-            end: "+=260%",
-            pin: true,
-            scrub: 1,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
+        if (isMobile) {
+          // Immediately reset any transform and ensure 100% opacity and normal flow
+          gsap.set([card1Ref.current, card2Ref.current, card3Ref.current], {
+            y: 0,
+            opacity: 1,
+            clearProps: "transform,opacity",
+          });
+        } else {
+          gsap.set(card2Ref.current, { y: "100vh", opacity: 0 });
+          gsap.set(card3Ref.current, { y: "100vh", opacity: 0 });
 
-        // Step 1: Hold Card 1 briefly as pinned section begins
-        buyersTl.to({}, { duration: 0.2 });
+          const buyersTl = gsap.timeline({
+            scrollTrigger: {
+              trigger: buyersSectionRef.current,
+              start: "top top",
+              end: "+=260%",
+              pin: true,
+              scrub: 0.8,
+              invalidateOnRefresh: true,
+            },
+          });
 
-        // Step 2: Card 2 pulls up smoothly into center
-        buyersTl.to(card2Ref.current, {
-          y: 0,
-          opacity: 1,
-          ease: "power2.out",
-          duration: 1.2,
-        });
+          // Step 1: Hold Card 1 briefly as pinned section begins
+          buyersTl.to({}, { duration: 0.2 });
 
-        // Step 3: Card 3 pulls up smoothly into right
-        buyersTl.to(
-          card3Ref.current,
-          {
+          // Step 2: Card 2 pulls up smoothly into center
+          buyersTl.to(card2Ref.current, {
             y: 0,
             opacity: 1,
             ease: "power2.out",
             duration: 1.2,
-          },
-          "+=0.2"
-        );
+          });
 
-        // Step 4: Crucial hold: all three cards stay fully up and visible together before releasing the page downwards
-        buyersTl.to({}, { duration: 1.2 });
+          // Step 3: Card 3 pulls up smoothly into right
+          buyersTl.to(
+            card3Ref.current,
+            {
+              y: 0,
+              opacity: 1,
+              ease: "power2.out",
+              duration: 1.2,
+            },
+            "+=0.2"
+          );
+
+          // Step 4: Crucial hold: all three cards stay fully up and visible together before releasing the page downwards
+          buyersTl.to({}, { duration: 1.2 });
+        }
       }
 
       // 5. Scroll-Driven Transition from About to Contact
@@ -351,6 +416,12 @@ export default function Home() {
         gsap.set(contactHeroImageRef.current, {
           scale: 1.15,
         });
+        if (contactHeroOverlayTextRef.current) {
+          gsap.set(contactHeroOverlayTextRef.current, {
+            opacity: 0,
+            y: 20,
+          });
+        }
         if (contactContentRef.current) {
           gsap.set(contactContentRef.current, {
             opacity: 0,
@@ -364,8 +435,7 @@ export default function Home() {
             start: "top top",
             end: "+=130%",
             pin: true,
-            scrub: 0.9,
-            anticipatePin: 1,
+            scrub: 0.8,
             invalidateOnRefresh: true,
           },
         });
@@ -400,8 +470,22 @@ export default function Home() {
               ease: "power2.inOut",
             },
             0.15
-          )
-          .to({}, { duration: 0.2 });
+          );
+
+        if (contactHeroOverlayTextRef.current) {
+          contactTl.to(
+            contactHeroOverlayTextRef.current,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: "power2.out",
+            },
+            0.35
+          );
+        }
+
+        contactTl.to({}, { duration: 0.2 });
 
         // Once scrolled past the pinned transition, reveal the Contact section content
         if (contactSectionRef.current && contactContentRef.current) {
@@ -459,12 +543,11 @@ export default function Home() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "2rem 4rem",
           zIndex: 60,
           backgroundColor: "transparent",
           backdropFilter: "none",
         }}
-        className="px-6 sm:px-12 md:px-16"
+        className="px-4 py-5 sm:px-10 sm:py-7 md:px-16 md:py-8"
       >
         <Link
           href="/about"
@@ -575,7 +658,7 @@ export default function Home() {
             <h1
               ref={headlineRef}
               style={{
-                fontSize: "clamp(2rem, 5.2vw, 5.2rem)",
+                fontSize: "clamp(1.28rem, 4.8vw, 5.2rem)",
                 fontWeight: 400,
                 lineHeight: 1.1,
                 letterSpacing: "-0.03em",
@@ -591,7 +674,7 @@ export default function Home() {
               }}
             >
               {/* Left Column: Only What's */}
-              <span style={{ textAlign: "right", whiteSpace: "nowrap", paddingRight: "clamp(0.6rem, 1.2vw, 1.5rem)" }}>
+              <span style={{ textAlign: "right", whiteSpace: "nowrap", paddingRight: "clamp(0.4rem, 1.2vw, 1.5rem)" }}>
                 Only What’s
               </span>
 
@@ -599,15 +682,15 @@ export default function Home() {
               <span
                 style={{
                   display: "inline-block",
-                  width: "clamp(85px, 9.5vw, 125px)",
-                  height: "clamp(85px, 9.5vw, 125px)",
+                  width: "clamp(55px, 8.5vw, 125px)",
+                  height: "clamp(55px, 8.5vw, 125px)",
                   flexShrink: 0,
                   visibility: "hidden",
                 }}
               />
 
               {/* Right Column: Worth Sharing */}
-              <span style={{ textAlign: "left", whiteSpace: "nowrap", paddingLeft: "clamp(0.6rem, 1.2vw, 1.5rem)" }}>
+              <span style={{ textAlign: "left", whiteSpace: "nowrap", paddingLeft: "clamp(0.4rem, 1.2vw, 1.5rem)" }}>
                 Worth Sharing
               </span>
             </h1>
@@ -623,8 +706,8 @@ export default function Home() {
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
-                width: "clamp(85px, 9.5vw, 125px)",
-                height: "clamp(85px, 9.5vw, 125px)",
+                width: "clamp(55px, 8.5vw, 125px)",
+                height: "clamp(55px, 8.5vw, 125px)",
                 borderRadius: "10px",
                 overflow: "hidden",
                 boxShadow: "0 14px 34px -6px rgba(85, 8, 24, 0.38), 0 0 0 1px rgba(85, 8, 24, 0.08)",
@@ -717,11 +800,10 @@ export default function Home() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "1.2rem 4rem",
               position: "relative",
               zIndex: 30,
             }}
-            className="px-6 sm:px-12 md:px-16"
+            className="px-4 py-4 sm:px-10 sm:py-5 md:px-16"
           >
             <div
               style={{
@@ -745,25 +827,23 @@ export default function Home() {
           position: "relative",
           zIndex: 35,
           minHeight: "75vh",
-          padding: "7rem 4rem 5rem 4rem",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
           alignItems: "flex-start",
           backgroundColor: "#FAF7F5",
         }}
-        className="px-6 sm:px-12 md:px-16"
+        className="px-4 py-16 sm:px-10 sm:py-20 md:px-16 md:py-28"
       >
         <div
+          ref={purposeBlockRef}
           style={{
             width: "100%",
-            padding: "2rem 0 4rem 0",
+            padding: "1rem 0 3rem 0",
             display: "grid",
-            gridTemplateColumns: "180px 1fr",
-            gap: "2rem 4rem",
             alignItems: "start",
           }}
-          className="grid grid-cols-1 md:grid-cols-[160px_1fr] lg:grid-cols-[200px_1fr]"
+          className="grid grid-cols-1 gap-6 md:grid-cols-[160px_1fr] md:gap-12 lg:grid-cols-[200px_1fr]"
         >
           {/* Left Column: Label like (About Us) in Snapshot 1 */}
           <div style={{ paddingTop: "0.6rem" }}>
@@ -803,29 +883,50 @@ export default function Home() {
         <div
           style={{
             width: "100%",
-            marginTop: "3.5rem",
+            marginTop: "2.5rem",
             marginBottom: "3rem",
             display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: "3.5rem 4rem",
           }}
-          className="grid-cols-1 md:grid-cols-2"
+          className="grid-cols-1 gap-12 md:grid-cols-2 md:gap-16"
         >
           {/* Vision Block (Pulled all the way left) */}
-          <div style={{ display: "flex", flexDirection: "column", textAlign: "left", maxWidth: "620px" }}>
-            <h3
+          <div
+            ref={visionBlockRef}
+            style={{ display: "flex", flexDirection: "column", textAlign: "left", maxWidth: "620px" }}
+          >
+            <div
               style={{
-                fontFamily: "var(--font-plus-jakarta), sans-serif",
-                fontSize: "clamp(2rem, 3.8vw, 3.75rem)",
-                fontWeight: 600,
-                lineHeight: 1.2,
-                color: "#550818",
+                display: "flex",
+                alignItems: "center",
+                gap: "1.25rem",
                 margin: "0 0 1.2rem 0",
-                letterSpacing: "-0.03em",
               }}
             >
-              Vision
-            </h3>
+              <h3
+                style={{
+                  fontFamily: "var(--font-plus-jakarta), sans-serif",
+                  fontSize: "clamp(2rem, 3.8vw, 3.75rem)",
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  color: "#550818",
+                  margin: 0,
+                  letterSpacing: "-0.03em",
+                  flexShrink: 0,
+                }}
+              >
+                Vision
+              </h3>
+              {/* Horizontal accent line next to Vision heading */}
+              <div
+                style={{
+                  flex: 1,
+                  maxWidth: "280px",
+                  height: "2.5px",
+                  borderRadius: "2px",
+                  backgroundColor: "rgba(85, 8, 24, 0.65)",
+                }}
+              />
+            </div>
             <p
               style={{
                 fontFamily: "var(--font-plus-jakarta), sans-serif",
@@ -843,28 +944,48 @@ export default function Home() {
 
           {/* Mission Block (Right side, staggered lower matching arrow direction) */}
           <div
+            ref={missionBlockRef}
             style={{
               display: "flex",
               flexDirection: "column",
               textAlign: "left",
               maxWidth: "620px",
-              marginLeft: "auto",
-              marginTop: "clamp(1.5rem, 4vw, 4rem)",
             }}
+            className="md:ml-auto md:mt-16"
           >
-            <h3
+            <div
               style={{
-                fontFamily: "var(--font-plus-jakarta), sans-serif",
-                fontSize: "clamp(2rem, 3.8vw, 3.75rem)",
-                fontWeight: 600,
-                lineHeight: 1.2,
-                color: "#550818",
+                display: "flex",
+                alignItems: "center",
+                gap: "1.25rem",
                 margin: "0 0 1.2rem 0",
-                letterSpacing: "-0.03em",
               }}
             >
-              Mission
-            </h3>
+              <h3
+                style={{
+                  fontFamily: "var(--font-plus-jakarta), sans-serif",
+                  fontSize: "clamp(2rem, 3.8vw, 3.75rem)",
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  color: "#550818",
+                  margin: 0,
+                  letterSpacing: "-0.03em",
+                  flexShrink: 0,
+                }}
+              >
+                Mission
+              </h3>
+              {/* Horizontal accent line next to Vision heading */}
+              <div
+                style={{
+                  flex: 1,
+                  maxWidth: "280px",
+                  height: "2.5px",
+                  borderRadius: "2px",
+                  backgroundColor: "rgba(85, 8, 24, 0.65)",
+                }}
+              />
+            </div>
             <p
               style={{
                 fontFamily: "var(--font-plus-jakarta), sans-serif",
@@ -1008,7 +1129,7 @@ export default function Home() {
               willChange: "width, height, border-radius",
             }}
           >
-            {/* Hero Image */}
+            {/* Hero Image - Landscape on Desktop, Portrait on Mobile */}
             <div
               ref={aboutHeroImageRef}
               style={{
@@ -1019,17 +1140,66 @@ export default function Home() {
                 willChange: "transform",
               }}
             >
-              <Image
-                src="/about-hero.jpg"
-                alt="Mabzul Fine Artisanal Chocolate, Almonds, Pistachios, and Cashews"
-                fill
-                sizes="100vw"
-                priority
+              {/* Desktop View: Keep exact original desktop image unchanged */}
+              <div className="hidden md:block absolute inset-0 w-full h-full">
+                <Image
+                  src="/about-hero.jpg"
+                  alt="Mabzul Fine Artisanal Chocolate, Almonds, Pistachios, and Cashews"
+                  fill
+                  sizes="100vw"
+                  priority
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "center",
+                  }}
+                />
+              </div>
+
+              {/* Mobile View: High-res portrait orientation image requested by user */}
+              <div className="block md:hidden absolute inset-0 w-full h-full">
+                <Image
+                  src="/about-hero-mobile.jpg"
+                  alt="Mabzul Fine Artisanal Chocolate, Almonds, Pistachios, and Cashews - Mobile Portrait"
+                  fill
+                  sizes="100vw"
+                  priority
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "center",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* ABOUT US Overlay Text on Hero Image (visible on both mobile and desktop) */}
+            <div
+              ref={aboutHeroOverlayTextRef}
+              style={{
+                position: "absolute",
+                top: "50%",
+                transform: "translateY(-50%)",
+                zIndex: 35,
+                pointerEvents: "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+              }}
+              className="left-5 sm:left-10 md:left-16"
+            >
+              <span
+                className="font-cormorant"
                 style={{
-                  objectFit: "cover",
-                  objectPosition: "center",
+                  fontSize: "clamp(2.4rem, 6.2vw, 5.4rem)",
+                  fontWeight: 600,
+                  letterSpacing: "0.24em",
+                  textTransform: "uppercase",
+                  color: "#FAF7F5",
+                  textShadow: "0 4px 20px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.3)",
+                  lineHeight: 1,
                 }}
-              />
+              >
+                ABOUT US
+              </span>
             </div>
           </div>
         </div>
@@ -1107,24 +1277,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Three Everyday Buyers Section (Dedicated Full Viewport Pinned Scroll Stage) */}
+      {/* Three Everyday Buyers Section */}
       <section
         ref={buyersSectionRef}
         style={{
           position: "relative",
           zIndex: 48,
           backgroundColor: "#FAF7F5",
-          height: "100vh",
           width: "100%",
-          padding: "5rem 4rem 3rem 4rem",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          overflow: "hidden",
           boxSizing: "border-box",
         }}
-        className="px-6 sm:px-12 md:px-16"
+        className="px-4 py-16 sm:px-10 sm:py-20 md:px-16 md:py-24 md:min-h-screen"
       >
         <div style={{ width: "100%", maxWidth: "1350px", margin: "0 auto" }}>
           <p
@@ -1145,20 +1312,19 @@ export default function Home() {
             style={{
               width: "100%",
               display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "2rem",
               alignItems: "start",
             }}
-            className="grid-cols-1 md:grid-cols-3"
+            className="grid-cols-1 gap-8 md:grid-cols-3 md:gap-8 justify-items-center md:justify-items-stretch"
           >
-            {/* Step 1: THE THOUGHTFUL HOST (Static left card) */}
+            {/* Step 1: THE THOUGHTFUL HOST */}
             <div
               ref={card1Ref}
               style={{
                 display: "flex",
-                justifyContent: "flex-start",
                 width: "100%",
+                maxWidth: "380px",
               }}
+              className="justify-center md:justify-start"
             >
               <div
                 style={{
@@ -1272,15 +1438,16 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Step 2: THE CORPORATE GIFTER (Pulled up on scroll) */}
+            {/* Step 2: THE CORPORATE GIFTER */}
             <div
               ref={card2Ref}
               style={{
                 display: "flex",
-                justifyContent: "center",
                 width: "100%",
+                maxWidth: "380px",
                 willChange: "transform, opacity",
               }}
+              className="justify-center"
             >
               <div
                 style={{
@@ -1394,15 +1561,16 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Step 3: THE EVERYDAY TREATER (Pulled up on scroll) */}
+            {/* Step 3: THE EVERYDAY TREATER */}
             <div
               ref={card3Ref}
               style={{
                 display: "flex",
-                justifyContent: "flex-end",
                 width: "100%",
+                maxWidth: "380px",
                 willChange: "transform, opacity",
               }}
+              className="justify-center md:justify-end"
             >
               <div
                 style={{
@@ -1553,7 +1721,7 @@ export default function Home() {
               willChange: "width, height, border-radius",
             }}
           >
-            {/* Hero Image */}
+            {/* Hero Image - Landscape on Desktop, Portrait on Mobile */}
             <div
               ref={contactHeroImageRef}
               style={{
@@ -1564,17 +1732,35 @@ export default function Home() {
                 willChange: "transform",
               }}
             >
-              <Image
-                src="/contact-hero.jpg"
-                alt="Contact Us - Mabzul Confectionery & Gourmet Gifting"
-                fill
-                sizes="100vw"
-                priority
-                style={{
-                  objectFit: "cover",
-                  objectPosition: "center",
-                }}
-              />
+              {/* Desktop View: Original landscape image untouched */}
+              <div className="hidden md:block absolute inset-0 w-full h-full">
+                <Image
+                  src="/contact-hero.jpg"
+                  alt="Contact Us - Mabzul Confectionery & Gourmet Gifting"
+                  fill
+                  sizes="100vw"
+                  priority
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "center",
+                  }}
+                />
+              </div>
+
+              {/* Mobile View: High-res portrait orientation image */}
+              <div className="block md:hidden absolute inset-0 w-full h-full">
+                <Image
+                  src="/contact-hero-mobile.jpg"
+                  alt="Contact Us - Mabzul Confectionery & Gourmet Gifting Portrait"
+                  fill
+                  sizes="100vw"
+                  priority
+                  style={{
+                    objectFit: "cover",
+                    objectPosition: "center",
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -1593,10 +1779,9 @@ export default function Home() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: "5rem 4rem 3rem 4rem",
           boxSizing: "border-box",
         }}
-        className="px-6 sm:px-12 md:px-16"
+        className="px-4 py-16 sm:px-10 sm:py-20 md:px-16 md:py-24"
       >
         <div
           ref={contactContentRef}
@@ -1605,12 +1790,10 @@ export default function Home() {
             maxWidth: "1300px",
             margin: "auto auto",
             display: "grid",
-            gridTemplateColumns: "1fr 1.3fr",
-            gap: "4rem 6rem",
             alignItems: "center",
             willChange: "opacity, transform",
           }}
-          className="grid-cols-1 md:grid-cols-[1fr_1.3fr]"
+          className="grid-cols-1 gap-12 md:grid-cols-[1fr_1.3fr] md:gap-24"
         >
           {/* Left Column: Heading */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
@@ -1800,7 +1983,6 @@ export default function Home() {
       <footer
         style={{
           width: "100%",
-          padding: "2.5rem 4rem 3.5rem 4rem",
           backgroundColor: "#FAF7F5",
           borderTop: "1px solid rgba(85, 8, 24, 0.12)",
           display: "flex",
@@ -1810,7 +1992,7 @@ export default function Home() {
           zIndex: 50,
           boxSizing: "border-box",
         }}
-        className="px-6 sm:px-12 md:px-16"
+        className="px-4 py-8 sm:px-10 sm:py-10 md:px-16"
       >
         <div style={{ fontSize: "0.85rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#550818" }}>
           MABZUL&reg; 2026

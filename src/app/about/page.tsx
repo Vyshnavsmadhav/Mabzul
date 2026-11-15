@@ -39,7 +39,7 @@ export default function AboutPage() {
     };
 
     gsap.ticker.add(tickerCallback);
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
 
     const ctx = gsap.context(() => {
       // EXACT Scroll-Driven Transition matching the Home -> About reference recording:
@@ -77,8 +77,7 @@ export default function AboutPage() {
             start: "top top",
             end: "+=130%",
             pin: true,
-            scrub: 0.9,
-            anticipatePin: 1,
+            scrub: 0.8,
             invalidateOnRefresh: true,
           },
         });

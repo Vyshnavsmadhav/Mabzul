@@ -95,30 +95,47 @@ export default function ContactPage() {
           padding: "0 4rem",
           boxSizing: "border-box",
         }}
-        className="px-6 sm:px-12 md:px-16"
+        className="px-4 sm:px-12 md:px-16"
       >
         <div
           style={{
             position: "relative",
             width: "100%",
-            aspectRatio: "16 / 7",
-            maxHeight: "520px",
             borderRadius: "20px",
             overflow: "hidden",
             boxShadow: "0 20px 55px -10px rgba(85, 8, 24, 0.2)",
           }}
+          className="aspect-[4/5] sm:aspect-[16/9] md:aspect-[16/7] max-h-[580px]"
         >
-          <Image
-            src="/contact-hero.jpg"
-            alt="Contact Us - Mabzul Fine Gourmet Gifting"
-            fill
-            sizes="100vw"
-            priority
-            style={{
-              objectFit: "cover",
-              objectPosition: "center",
-            }}
-          />
+          {/* Desktop View: Original landscape image untouched */}
+          <div className="hidden md:block absolute inset-0 w-full h-full">
+            <Image
+              src="/contact-hero.jpg"
+              alt="Contact Us - Mabzul Fine Gourmet Gifting"
+              fill
+              sizes="100vw"
+              priority
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+              }}
+            />
+          </div>
+
+          {/* Mobile View: High-res portrait orientation image */}
+          <div className="block md:hidden absolute inset-0 w-full h-full">
+            <Image
+              src="/contact-hero-mobile.jpg"
+              alt="Contact Us - Mabzul Fine Gourmet Gifting Portrait"
+              fill
+              sizes="100vw"
+              priority
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+              }}
+            />
+          </div>
         </div>
       </div>
 
